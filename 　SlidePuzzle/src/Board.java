@@ -5,6 +5,8 @@ import java.util.List;
 public class Board {
 
     private final int[][] tiles;
+    private int hamming;
+    private int manhattan;
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
     public Board(int[][] tiles){
@@ -12,6 +14,20 @@ public class Board {
         for(int i = 0; i < tiles.length;i++){
             for(int j = 0; j < tiles[0].length; j++){
                 this.tiles[i][j] = tiles[i][j];
+            }
+        }
+        for(int i = 0; i < tiles.length; i++){
+            for(int j = 0; j < tiles[0].length; j++){
+                if(tiles[i][j] == 0) continue;
+                if(tiles[i][j] -1 != i* tiles.length + j) hamming++;
+            }
+        }
+        for(int i = 0; i < tiles.length; i++){
+            for(int j = 0; j < tiles[0].length; j++){
+                if(tiles[i][j] == 0) continue;
+                int r = (tiles[i][j] -1)/ this.dimension();
+                int c = (tiles[i][j] -1)% this.dimension();
+                manhattan += Math.abs(r - i) +  Math.abs(c - j);
             }
         }
     }
@@ -41,28 +57,12 @@ public class Board {
 
     // number of tiles out of place
     public int hamming(){
-        int res = 0;
-        for(int i = 0; i < tiles.length; i++){
-            for(int j = 0; j < tiles[0].length; j++){
-                if(tiles[i][j] == 0) continue;
-                if(tiles[i][j] -1 != i* tiles.length + j) res++;
-            }
-        }
-        return res;
+        return hamming;
     }
 
     // sum of Manhattan distances between tiles and goal
     public int manhattan(){
-        int res = 0;
-        for(int i = 0; i < tiles.length; i++){
-            for(int j = 0; j < tiles[0].length; j++){
-                if(tiles[i][j] == 0) continue;
-                int r = (tiles[i][j] -1)/ this.dimension();
-                int c = (tiles[i][j] -1)% this.dimension();
-                res += Math.abs(r - i) +  Math.abs(c - j);
-            }
-        }
-        return res;
+        return manhattan;
     }
 
     // is this board the goal board?
