@@ -57,7 +57,14 @@ public class Solver {
         seen.add(start);
         int step = 0;
         while(!pq.isEmpty()){
-            SearchNode
+            SearchNode cur = pq.delMin();
+            for(Board bd : cur.current.neighbors()){
+                if(!seen.contains(bd)){
+                    pq.insert(new SearchNode(cur.current, cur.move+1, bd));
+                }
+            }
+            result.add(cur.current);
+            if(cur.current.isGoal()) break;
         }
         return result;
     }
