@@ -1,4 +1,6 @@
-import edu.princeton.cs.algs4.StdRandom;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Board {
 
@@ -55,7 +57,9 @@ public class Board {
         for(int i = 0; i < tiles.length; i++){
             for(int j = 0; j < tiles[0].length; j++){
                 if(tiles[i][j] == 0) continue;
-                res += Math.abs(tiles[i][j] - 1 - i * tiles.length -j);
+                int r = (tiles[i][j] -1)/ this.dimension();
+                int c = (tiles[i][j] -1)% this.dimension();
+                res += Math.abs(r - i) +  Math.abs(c - j);
             }
         }
         return res;
@@ -75,16 +79,59 @@ public class Board {
 
     // does this board equal y?
     public boolean equals(Object y){
-        if(this.dimension()!= (Board) y.dimension()) return false;
-
+        if(this.dimension()!= ((Board)y).dimension()) return false;
+        for(int i = 0; i < this.dimension(); i++){
+            for(int j = 0; j < this.dimension();j++){
+                if(tiles[i][j] != ((Board)y).tiles[i][j]) return false;
+            }
+        }
+        return true;
     }
 
     // all neighboring boards
-    public Iterable<Board> neighbors()
+    public Iterable<Board> neighbors(){
+        List<Board> list = new ArrayList<>();
+        int x = 0, y = 0;
+        for(int i = 0; i < this.dimension(); i++){
+            for(int j = 0; j < this.dimension(); j++){
+                if(tiles[i][j] == 0){
+                    x = i;
+                    y = j;
+                    break;
+                }
+            }
+        }
+        int[][] dirs = new int[][]{{-1,0}, {1,0},{0,-1},{0,1}};
+        for(int i = 0; i < 4; i++){
+            int r = x + dirs[i][0];
+            int c = y + dirs[i][1];
+            if(r <0 || r >= this.dimension() || c <0 || c >= this.dimension()) continue;
+            int[][] temp = new int[this.dimension()][this.dimension()];
+            for(int m = 0; m < this.dimension(); m++){
+                for(int n = 0; n < this.dimension();n++){
+                    temp[m][n] = this.tiles[m][n];
+
+                }
+            }
+            int pre = temp[r][c];
+            temp[r][c] = 0;
+            temp[x][y] = pre;
+            Board next = new Board(temp);
+            list.add(next);
+        }
+        return list;
+    }
 
     // a board that is obtained by exchanging any pair of tiles
-    public Board twin()
+    public Board twin(){
+        return null;
+    }
 
     // unit testing (not graded)
-    public static void main(String[] args)
+    public static void main(String[] args){
+        int[][] ts = new int[][]{{8,1,3},{4,0,2},{7,6,5}};
+        Board b = new Board(ts);
+        System.out.println("hamming is "+ b.hamming());
+        System.out.println("manhat is "+ b.manhattan());
+    }
 }
