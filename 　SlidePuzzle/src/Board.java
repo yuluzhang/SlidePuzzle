@@ -7,6 +7,8 @@ public class Board {
     private final int[][] tiles;
     private int hamming;
     private int manhattan;
+    private int zerox;
+    private int zeroy;
 
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
@@ -15,6 +17,10 @@ public class Board {
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles[0].length; j++) {
                 this.tiles[i][j] = tiles[i][j];
+                if(tiles[i][j] == 0){
+                    zerox = i;
+                    zeroy = j;
+                }
             }
         }
         for (int i = 0; i < tiles.length; i++) {
@@ -93,16 +99,7 @@ public class Board {
     // all neighboring boards
     public Iterable<Board> neighbors() {
         List<Board> list = new ArrayList<>();
-        int x = 0, y = 0;
-        for (int i = 0; i < this.dimension(); i++) {
-            for (int j = 0; j < this.dimension(); j++) {
-                if (tiles[i][j] == 0) {
-                    x = i;
-                    y = j;
-                    break;
-                }
-            }
-        }
+        int x = zerox, y =zeroy;
         int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         for (int i = 0; i < 4; i++) {
             int r = x + dirs[i][0];
@@ -126,7 +123,24 @@ public class Board {
 
     // a board that is obtained by exchanging any pair of tiles
     public Board twin() {
-        return null;
+        int[][] temp = new int[this.dimension()][this.dimension()];
+        int first = -1, second = -1;
+        int idxofZero = zerox * this.dimension() + zeroy;
+        for(int i = 0; i < this.dimension() * this.dimension(); i++){
+            if(i == idxofZero) continue;
+            if(first != -1 && second != -1) break;
+            if(first == -1) first = i;
+            else second = i;
+        }
+        temp[zerox][zeroy] = 0;
+        temp[first/this.dimension()][first%this.dimension()] = tiles[second/this.dimension()][second%this.dimension()];
+        temp[second/this.dimension()][second % this.dimension()] = tiles[first/this.dimension()][first % this.dimension()];
+
+        for(int i = 0; i < this.dimension() * this.dimension();i++){
+            if(i == idxofZero ||i == first || i == second ) continue;
+            temp[i / this.dimension()][i % this.dimension()] = tiles[i / this.dimension()][i % this.dimension()];
+        }
+        return new Board(temp);
     }
 
 //    // unit testing (not graded)
