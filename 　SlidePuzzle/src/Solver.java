@@ -2,18 +2,15 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
 import edu.princeton.cs.algs4.StdOut;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Solver {
     private class SearchNode {
-        private final Board previous;
+        private final SearchNode previous;
         private final int move;
         private final Board current;
 
-        public SearchNode(Board prev, int m, Board cur) {
+        public SearchNode(SearchNode prev, int m, Board cur) {
             current = cur;
             previous = prev;
             move = m;
@@ -39,7 +36,8 @@ public class Solver {
     }
 
     private final Board start;
-    private final List<Board> result = new ArrayList<>();
+    private final List<SearchNode> result = new ArrayList<>();
+    private int step = 0;
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
@@ -58,26 +56,35 @@ public class Solver {
         MinPQ<SearchNode> pq = new MinPQ<>(new ManhattanComparator());
         SearchNode ini = new SearchNode(null, 0, start);
         pq.insert(ini);
-
         while (!pq.isEmpty()) {
             SearchNode cur = pq.delMin();
             for (Board bd : cur.current.neighbors()) {
-                if (!result.contains(bd) && !bd.equals(cur.previous)) {
-                    pq.insert(new SearchNode(cur.current, cur.move + 1, bd));
+                if (!result.contains(bd)){
+                   if(cur.previous!=null) {
+                       if (!bd.equals(cur.previous.current)) pq.insert(new SearchNode(cur, cur.move + 1, bd));
+                   } else pq.insert(new SearchNode(cur, cur.move + 1, bd));
                 }
             }
-            result.add(cur.current);
+            step = Math.max(step, cur.move);
+            result.add(cur);
             if (cur.current.isGoal()) break;
         }
-        return result.size() - 1;
+        return step;
     }
 
     // sequence of boards in a shortest solution
     public Iterable<Board> solution() {
-        if (result.isEmpty()) {
+        if (step == 0) {
             moves();
         }
-        return result;
+        List<Board> res = new ArrayList<>();
+        SearchNode last = result.get(result.size()-1);
+        while(last != null){
+            res.add(last.current);
+            last = last.previous;
+        }
+        Collections.reverse(res);
+        return res;
     }
 
     // test client (see below)
