@@ -5,8 +5,6 @@ import java.util.List;
 public class Board {
 
     private final int[][] tiles;
-    private int hamming;
-    private int manhattan;
     private int zerox;
     private int zeroy;
 
@@ -21,20 +19,6 @@ public class Board {
                     zerox = i;
                     zeroy = j;
                 }
-            }
-        }
-        for (int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[0].length; j++) {
-                if (tiles[i][j] == 0) continue;
-                if (tiles[i][j] - 1 != i * tiles.length + j) hamming++;
-            }
-        }
-        for (int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[0].length; j++) {
-                if (tiles[i][j] == 0) continue;
-                int r = (tiles[i][j] - 1) / this.dimension();
-                int c = (tiles[i][j] - 1) % this.dimension();
-                manhattan += Math.abs(r - i) + Math.abs(c - j);
             }
         }
     }
@@ -64,11 +48,27 @@ public class Board {
 
     // number of tiles out of place
     public int hamming() {
+        int hamming = 0;
+        for (int i = 0; i < tiles.length; i++) {
+            for (int j = 0; j < tiles[0].length; j++) {
+                if (tiles[i][j] == 0) continue;
+                if (tiles[i][j] - 1 != i * tiles.length + j) hamming++;
+            }
+        }
         return hamming;
     }
 
     // sum of Manhattan distances between tiles and goal
     public int manhattan() {
+        int manhattan = 0;
+        for (int i = 0; i < tiles.length; i++) {
+            for (int j = 0; j < tiles[0].length; j++) {
+                if (tiles[i][j] == 0) continue;
+                int r = (tiles[i][j] - 1) / this.dimension();
+                int c = (tiles[i][j] - 1) % this.dimension();
+                manhattan += Math.abs(r - i) + Math.abs(c - j);
+            }
+        }
         return manhattan;
     }
 
@@ -86,6 +86,7 @@ public class Board {
 
     // does this board equal y?
     public boolean equals(Object y) {
+        //if (y == null || !(y.getClass().equals(Board.class))) return false;
         if (y == null || !(y instanceof Board)) return false;
         if (this.dimension() != ((Board) y).dimension()) return false;
         for (int i = 0; i < this.dimension(); i++) {
@@ -143,11 +144,10 @@ public class Board {
         return new Board(temp);
     }
 
-//    // unit testing (not graded)
-//    public static void main(String[] args){
-//        int[][] ts = new int[][]{{8,1,3},{4,0,2},{7,6,5}};
-//        Board b = new Board(ts);
-//        System.out.println("hamming is "+ b.hamming());
-//        System.out.println("manhat is "+ b.manhattan());
-//    }
+    // unit testing (not graded)
+    public static void main(String[] args){
+        int[][] ts = new int[][]{{8,1,3},{4,0,2},{7,6,5}};
+        Board b = new Board(ts);
+        System.out.println(b.equals(0));
+    }
 }
