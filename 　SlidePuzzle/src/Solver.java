@@ -3,10 +3,10 @@ import edu.princeton.cs.algs4.MinPQ;
 import edu.princeton.cs.algs4.StdOut;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
+import java.util.Deque;
+import java.util.ArrayDeque;
 
 public class Solver {
     private class SearchNode {
@@ -78,8 +78,6 @@ public class Solver {
         }
         return step;
     }
-    //private final List<SearchNode> result = new ArrayList<>();
-
 
     private List<SearchNode>  calculate() {
         List<SearchNode> result = new ArrayList<>();
@@ -123,14 +121,13 @@ public class Solver {
             return null;
         } else {
             List<SearchNode> result = calculate();
-            List<Board> res = new ArrayList<>();
+            Deque<Board> dq = new ArrayDeque<>();
             SearchNode last = result.get(result.size() - 1);
             while (last != null) {
-                res.add(last.current);
+                dq.addFirst(last.current);
                 last = last.previous;
             }
-            Collections.reverse(res);
-            return res;
+            return dq;
         }
 
     }
