@@ -9,21 +9,39 @@ import java.util.Deque;
 import java.util.ArrayDeque;
 
 public class Solver {
-    private class SearchNode {
+    private static class SearchNode {
         private final SearchNode previous;
         private final int move;
         private final Board current;
-        private int manhattan;
-        private int hamming;
+        private final int manhattan;
 
         public SearchNode(SearchNode prev, int m, Board cur) {
             current = cur;
             previous = prev;
             move = m;
             manhattan = cur.manhattan();
-            hamming = cur.hamming();
         }
     }
+
+    private static class StarComparator implements Comparator<SearchNode> {
+        @Override
+        public int compare(SearchNode a, SearchNode b) {
+            int val =  a.move + a.manhattan - b.move - b.manhattan;
+            if ( val == 0)
+                return a.manhattan - b.manhattan;
+            return val;
+        }
+    }
+//    private static class ManComparator implements Comparator<SearchNode> {
+//        @Override
+//        public int compare(SearchNode a, SearchNode b) {
+//            int val = a.move + a.manhattan - b.move -b.manhattan;
+//            if ( val == 0)
+//                return a.manhattan - b.manhattan;
+//            return val;
+//        }
+//    }
+
 
     private final Board start;
     private int step = -1;
@@ -37,32 +55,27 @@ public class Solver {
     // is the initial board solvable? (see below)
     public boolean isSolvable() {
         Board twin = start.twin();
-        MinPQ<SearchNode> pq = new MinPQ<>(new Comparator<SearchNode>() {
-            @Override
-            public int compare(SearchNode a, SearchNode b) {
-                if (2 * a.move + a.hamming + a.manhattan - 2 * b.move - b.hamming - b.manhattan == 0)
-                    return a.hamming - b.hamming;
-                return 2 * a.move + a.hamming + a.manhattan - 2 * b.move - b.hamming - b.manhattan;
-            }
-        }
-        );
-        //MinPQ<SearchNode> pq = new MinPQ<>((a, b) -> (2 * a.move + a.hamming + a.manhattan - 2 * b.move - b.hamming - b.manhattan));
+        MinPQ<SearchNode> pq = new MinPQ<>(new StarComparator());
         pq.insert(new SearchNode(null, 0, twin));
         pq.insert(new SearchNode(null, 0, start));
         SearchNode last = null;
         while (!pq.isEmpty()) {
             SearchNode cur = pq.delMin();
+            if (cur.current.isGoal()) {
+                last = cur;
+                break;
+            }
             boolean found = false;
             for (Board bd : cur.current.neighbors()) {
                 if ((cur.previous != null && bd.equals(cur.previous.current))) continue;
-                if(bd.isGoal()){
+                if (bd.isGoal()) {
                     last = new SearchNode(cur, cur.move + 1, bd);
                     found = true;
                     break;
                 }
                 pq.insert(new SearchNode(cur, cur.move + 1, bd));
             }
-            if(found) break;
+            if (found) break;
         }
         while (last.previous != null) {
             last = last.previous;
@@ -79,40 +92,33 @@ public class Solver {
         return step;
     }
 
-    private List<SearchNode>  calculate() {
-        List<SearchNode> result = new ArrayList<>();
-        MinPQ<SearchNode> pq = new MinPQ<>(new Comparator<SearchNode>() {
-            @Override
-            public int compare(SearchNode a, SearchNode b) {
-                if (2 * a.move + a.hamming + a.manhattan - 2 * b.move - b.hamming - b.manhattan == 0)
-                    return a.hamming - b.hamming;
-                return 2 * a.move + a.hamming + a.manhattan - 2 * b.move - b.hamming - b.manhattan;
-            }
-        }
-        );
-        //MinPQ<SearchNode> pq = new MinPQ<>((a, b) -> (2 * a.move + a.hamming + a.manhattan - 2 * b.move - b.hamming - b.manhattan));
+    private SearchNode calculate() {
+        SearchNode last = null;
+        MinPQ<SearchNode> pq = new MinPQ<>(new StarComparator());
         SearchNode ini = new SearchNode(null, 0, start);
         pq.insert(ini);
         while (!pq.isEmpty()) {
             SearchNode cur = pq.delMin();
             step = Math.max(step, cur.move);
-            result.add(cur);
-            if(cur.current.isGoal()) break;
+            if (cur.current.isGoal()) {
+                last = cur;
+                break;
+            }
             boolean found = false;
             for (Board bd : cur.current.neighbors()) {
                 if (cur.previous != null && bd.equals(cur.previous.current)) continue;
                 SearchNode sn = new SearchNode(cur, cur.move + 1, bd);
-                if(bd.isGoal()){
+                if (bd.isGoal()) {
                     found = true;
                     step = Math.max(step, sn.move);
-                    result.add(sn);
+                    last = sn;
                     break;
                 }
                 pq.insert(sn);
             }
-            if(found) break;
+            if (found) break;
         }
-        return result;
+        return last;
     }
 
     // sequence of boards in a shortest solution
@@ -120,9 +126,8 @@ public class Solver {
         if (!isSolvable()) {
             return null;
         } else {
-            List<SearchNode> result = calculate();
             Deque<Board> dq = new ArrayDeque<>();
-            SearchNode last = result.get(result.size() - 1);
+            SearchNode last = calculate();
             while (last != null) {
                 dq.addFirst(last.current);
                 last = last.previous;

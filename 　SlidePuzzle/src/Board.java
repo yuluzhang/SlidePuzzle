@@ -1,7 +1,7 @@
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import edu.princeton.cs.algs4.Stack;
 
 public class Board {
 
@@ -88,7 +88,7 @@ public class Board {
     // does this board equal y?
     public boolean equals(Object y) {
         //if (y == null || !(y.getClass().equals(Board.class))) return false;
-        if (y == null || !(y instanceof Board)) return false;
+        if (!(y instanceof Board)) return false;
         if (this.dimension() != ((Board) y).dimension()) return false;
         if(Arrays.deepEquals(this.tiles, ((Board) y).tiles)) return true;
         return false;
@@ -96,7 +96,8 @@ public class Board {
 
     // all neighboring boards
     public Iterable<Board> neighbors() {
-        List<Board> list = new ArrayList<>();
+        //List<Board> list = new ArrayList<>();
+        Stack<Board> stack = new Stack<>();
         int x = zerox, y =zeroy;
         int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         for (int i = 0; i < 4; i++) {
@@ -114,9 +115,9 @@ public class Board {
             temp[r][c] = 0;
             temp[x][y] = pre;
             Board next = new Board(temp);
-            list.add(next);
+            stack.push(next);
         }
-        return list;
+        return stack;
     }
 
     // a board that is obtained by exchanging any pair of tiles
@@ -143,7 +144,7 @@ public class Board {
 
     // unit testing (not graded)
     public static void main(String[] args){
-        int[][] ts = new int[][]{{8,1,3},{4,0,2},{7,6,5}};
+        int[][] ts = {{8,1,3},{4,0,2},{7,6,5}};
         Board b = new Board(ts);
         System.out.println(b.equals(0));
     }
