@@ -1,5 +1,6 @@
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Board {
@@ -89,12 +90,8 @@ public class Board {
         //if (y == null || !(y.getClass().equals(Board.class))) return false;
         if (y == null || !(y instanceof Board)) return false;
         if (this.dimension() != ((Board) y).dimension()) return false;
-        for (int i = 0; i < this.dimension(); i++) {
-            for (int j = 0; j < this.dimension(); j++) {
-                if (tiles[i][j] != ((Board) y).tiles[i][j]) return false;
-            }
-        }
-        return true;
+        if(Arrays.deepEquals(this.tiles, ((Board) y).tiles)) return true;
+        return false;
     }
 
     // all neighboring boards
